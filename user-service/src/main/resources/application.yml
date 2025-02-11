@@ -1,0 +1,7 @@
+spring:
+    application:
+      name: user-service
+    profiles:
+      active: test
+    config:
+      import: optional:configserver:http://configserver:8071
