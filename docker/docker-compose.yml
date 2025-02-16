@@ -25,6 +25,50 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  userdb:
+    image: postgres:latest
+    container_name: userdb
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: userservice_db
+    volumes:
+      - ./sql/init_user.sql:/docker-entrypoint-initdb.d/1-init_user.sql
+      - ./sql/data_user.sql:/docker-entrypoint-initdb.d/2-data_user.sql
+    networks:
+      backend:
+        aliases:
+          - "userdb"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dev -d userservice_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+      # PostgreSQL for Course Service
+  coursedb:
+    image: postgres:latest
+    container_name: coursedb
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: courseservice_db
+    volumes:
+      - ./sql/init_course.sql:/docker-entrypoint-initdb.d/1-init_course.sql
+      - ./sql/data_course.sql:/docker-entrypoint-initdb.d/2-data_course.sql
+    networks:
+      backend:
+        aliases:
+          - "coursedb"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dev -d courseservice_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Config Server
   configserver:
@@ -46,13 +90,73 @@ services:
         aliases:
           - "configserver"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8089/"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8089/" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # User Service
+  userservice:
+    build:
+      context: "../user-service"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/user-service-0.0.2-SNAPSHOT.jar
+    image: elearning/userservice:0.0.2-SNAPSHOT
+    container_name: userservice
+    ports:
+      - "8081:8080"  # Maps host 8081 to container 8080
+    environment:
+      SPRING_APPLICATION_NAME: user-service
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+      CONFIGSERVER_URI: "http://configserver:8089"
+      CONFIGSERVER_PORT: "8089"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://userdb:5432/userservice_db
+      SPRING_DATASOURCE_USERNAME: dev
+      SPRING_DATASOURCE_PASSWORD: dev
+      GITHUB_USERNAME: "Nicholas-Bava"
+      GITHUB_PASSWORD: "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"
+    depends_on:
+      userdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "userservice"
 
+    # Course Service
+  courseservice:
+    build:
+      context: "../course-service"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/course-service-0.0.2-SNAPSHOT.jar
+    image: elearning/courseservice:0.0.2-SNAPSHOT
+    container_name: courseservice
+    ports:
+      - "8082:8080"  # Maps host 8082 to container 8080
+    environment:
+      SPRING_APPLICATION_NAME: course-service
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+      CONFIGSERVER_URI: "http://configserver:8089"
+      CONFIGSERVER_PORT: "8089"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://coursedb:5432/courseservice_db
+      SPRING_DATASOURCE_USERNAME: dev
+      SPRING_DATASOURCE_PASSWORD: dev
+      GITHUB_USERNAME: "Nicholas-Bava"
+      GITHUB_PASSWORD: "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"
+    depends_on:
+      coursedb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "courseservice"
 
   # Enrollment Service
   enrollmentservice:
