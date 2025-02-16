@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile
       args:
         JAR_FILE: target/configserver-0.0.1-SNAPSHOT.jar
-    image: elearning/configserver:latest
+    image: elearning/configserver:0.0.1-SNAPSHOT
     container_name: configserver
     ports:
       - "8089:8089"
@@ -61,21 +61,22 @@ services:
       dockerfile: Dockerfile
       args:
         JAR_FILE: target/enrollment-service-0.0.1-SNAPSHOT.jar
-    image: elearning/enrollmentservice:latest
+    image: elearning/enrollmentservice:0.0.1-SNAPSHOT
     container_name: enrollmentservice
-    ports:
-      - "8083:8083"
+
     environment:
       SPRING_APPLICATION_NAME: enrollment-service
       SPRING_PROFILES_ACTIVE: dev
       SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+      CONFIGSERVER_URI: "http://configserver:8089"
+      CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://enrollmentdb:5432/enrollmentservice_db
       SPRING_DATASOURCE_USERNAME: dev
       SPRING_DATASOURCE_PASSWORD: dev
       GITHUB_USERNAME: "Nicholas-Bava"
       GITHUB_PASSWORD: "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"
-      CONFIGSERVER_URI: "http://configserver:8089"
-      CONFIGSERVER_PORT: "8089"
+    ports:
+      - "8083:8080"
     depends_on:
       enrollmentdb:
         condition: service_healthy

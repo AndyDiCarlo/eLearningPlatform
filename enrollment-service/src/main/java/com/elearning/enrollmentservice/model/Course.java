@@ -1,5 +1,6 @@
 package com.elearning.enrollmentservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -40,6 +41,7 @@ public class Course {
     private LocalDateTime endDate;
 
     @OneToMany(mappedBy = "course")
+    @JsonIgnore
     private List<Enrollment> enrollments;
 
 

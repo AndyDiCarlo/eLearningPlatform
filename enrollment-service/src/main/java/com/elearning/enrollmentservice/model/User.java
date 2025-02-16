@@ -1,5 +1,6 @@
 package com.elearning.enrollmentservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -36,6 +37,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Enrollment> enrollments;
 
     public User() {
