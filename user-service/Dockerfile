@@ -1,31 +1,13 @@
-#stage 1
-#Start with a base image containing Java runtime
-FROM openjdk:17-slim as build
+# Stage 1: Build using Maven
+FROM maven:3.8.5-openjdk-17-slim AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Add Maintainer Info
-LABEL maintainer="Andy DiCarlo & Nick Bava"
-
-# The application's jar file
-ARG JAR_FILE
-
-# Add the application's jar to the container
-COPY ${JAR_FILE} app.jar
-
-#unpackage jar file
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
-
-#stage 2
-#Same Java runtime
+# Stage 2: Create runtime image
 FROM openjdk:17-slim
-
-#Add volume pointing to /tmp
-VOLUME /tmp
-
-#Copy unpackaged application to new container
-ARG DEPENDENCY=/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-
-#execute the application
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.elearning.user.UserServiceApplication"]
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]

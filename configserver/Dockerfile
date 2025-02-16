@@ -3,7 +3,7 @@
 FROM openjdk:17-slim as build
 
 # Add Maintainer Info
-LABEL maintainer="Andy DiCarlo & Nick Bava"
+LABEL maintainer="Nick Bava <Nicholas_Bava1@baylor.edu>"
 
 # The application's jar file
 ARG JAR_FILE

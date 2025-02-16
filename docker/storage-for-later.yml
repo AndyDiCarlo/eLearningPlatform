@@ -27,3 +27,67 @@ courseservice:
     backend:
       aliases:
         - "courseservice"
+userdb:
+  image: postgres:latest
+  container_name: userdb
+  ports:
+    - "5433:5432"
+  environment:
+    POSTGRES_USER: dev
+    POSTGRES_PASSWORD: dev
+    POSTGRES_DB: userservice_db
+  networks:
+    backend:
+      aliases:
+        - "userdb"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+# PostgreSQL for Course Service
+coursedb:
+  image: postgres:latest
+  container_name: coursedb
+  ports:
+    - "5434:5432"
+  environment:
+    POSTGRES_USER: dev
+    POSTGRES_PASSWORD: dev
+    POSTGRES_DB: courseservice_db
+  networks:
+    backend:
+      aliases:
+        - "coursedb"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+userservice:
+  build:
+    context: "../user-service"
+    dockerfile: Dockerfile
+    args:
+      JAR_FILE: target/userservice.jar
+  image: elearning/userservice:latest
+  container_name: userservice
+  ports:
+    - "8081:8081"
+  environment:
+    PROFILE: dev
+    SPRING_APPLICATION_NAME: userservice
+    SPRING_DATASOURCE_URL: jdbc:postgresql://userdb:5432/userservice_db
+    GITHUB_USERNAME: "Nicholas-Bava"
+    GITHUB_PASSWORD: "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"
+    SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+  depends_on:
+    userdb:
+      condition: service_healthy
+    configserver:
+      condition: service_started
+  networks:
+    backend:
+      aliases:
+        - "userservice"
