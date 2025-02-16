@@ -1,0 +1,29 @@
+# Course Service
+courseservice:
+  build:
+    context: "../Course Service"
+    dockerfile: Dockerfile
+    args:
+      JAR_FILE: target/courseservice.jar
+  image: myorg/courseservice:latest
+  container_name: courseservice
+  ports:
+    - "8082:8082"
+  environment:
+    PROFILE: dev
+    SPRING_APPLICATION_NAME: courseservice
+    SPRING_DATASOURCE_URL: jdbc:postgresql://coursedb:5432/courseservice_db
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: postgres
+    GITHUB_USERNAME: "Nicholas-Bava"
+    GITHUB_PASSWORD: "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"
+    SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+  depends_on:
+    coursedb:
+      condition: service_healthy
+    configserver:
+      condition: service_started
+  networks:
+    backend:
+      aliases:
+        - "courseservice"

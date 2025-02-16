@@ -1,56 +1,155 @@
-version: '2.1'
+version: "3.8"
+
 services:
-  database:
-    container_name: postgres-db
+  # PostgreSQL for User Service
+  userdb:
     image: postgres:latest
+    container_name: userdb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB:       "elearning"
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: userservice_db
     volumes:
-        - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
-        - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./sql/init_user.sql:/docker-entrypoint-initdb.d/1-init_user.sql
+      - ./sql/data_user.sql:/docker-entrypoint-initdb.d/2-data_user.sql
     networks:
       backend:
         aliases:
-          - "database"
+          - "userdb"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-  configserver:
-    container_name: config-server
-    image: elearning/configserver:0.0.1-SNAPSHOT
+
+  # PostgreSQL for Course Service
+  coursedb:
+    image: postgres:latest
+    container_name: coursedb
     ports:
-      - "8071:8071"
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: courseservice_db
+    volumes:
+      - ./sql/init_course.sql:/docker-entrypoint-initdb.d/1-init_course.sql
+      - ./sql/data_course.sql:/docker-entrypoint-initdb.d/2-data_course.sql
+    networks:
+      backend:
+        aliases:
+          - "coursedb"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL for Enrollment Service
+  enrollmentdb:
+    image: postgres:latest
+    container_name: enrollmentdb
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: enrollmentservice_db
+    volumes:
+      - ./sql/init_enrollment.sql:/docker-entrypoint-initdb.d/1-init_enrollment.sql
+      - ./sql/data_enrollment.sql:/docker-entrypoint-initdb.d/2-data_enrollment.sql
+    networks:
+      backend:
+        aliases:
+          - "enrollmentdb"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Config Server
+  configserver:
+    build:
+      context: "../Configuration Server"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/configserver-0.0.1-SNAPSHOT.jar
+    image: myorg/configserver:latest
+    container_name: configserver
+    ports:
+      - "8089:8089"
+    environment:
+      SERVER_PORT: "8089"
+      GITHUB_USERNAME: "Nicholas-Bava"
+      GITHUB_PASSWORD: "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"
     networks:
       backend:
         aliases:
           - "configserver"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # User Service
   userservice:
-    container_name: user-service
-    image: elearning/user-service:0.0.2-SNAPSHOT
+    build:
+      context: "../User Service"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/userservice.jar
+    image: myorg/userservice:latest
+    container_name: userservice
+    ports:
+      - "8081:8081"
     environment:
-      PROFILE: "dev"
-      CONFIGSERVER_URI: "http://configserver:8071"
-      CONFIGSERVER_PORT:   "8071"
-      DATABASESERVER_PORT: "5432"
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/elearning
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      PROFILE: dev
+      SPRING_APPLICATION_NAME: userservice
+      SPRING_DATASOURCE_URL: jdbc:postgresql://userdb:5432/userservice_db
+      GITHUB_USERNAME: "Nicholas-Bava"
+      GITHUB_PASSWORD: "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"
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
     depends_on:
-      database:
+      userdb:
         condition: service_healthy
       configserver:
         condition: service_started
-    ports:
-      - "8080:8080"
     networks:
-      - backend
+      backend:
+        aliases:
+          - "userservice"
+
+  # Enrollment Service
+  enrollmentservice:
+    build:
+      context: "../Enrollment Service"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/enrollmentservice.jar
+    image: myorg/enrollmentservice:latest
+    container_name: enrollmentservice
+    ports:
+      - "8083:8083"
+    environment:
+      PROFILE: dev
+      SPRING_APPLICATION_NAME: enrollmentservice
+      SPRING_DATASOURCE_URL: jdbc:postgresql://enrollmentdb:5432/enrollmentservice_db
+      GITHUB_USERNAME: "Nicholas-Bava"
+      GITHUB_PASSWORD: "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"
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+    depends_on:
+      enrollmentdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "enrollmentservice"
 
 networks:
   backend:

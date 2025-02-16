@@ -3,17 +3,21 @@ spring:
     name: config-server
   profiles:
     active:
-    - native
+      - git
   cloud:
     config:
       server:
+        #native:
+        #search-locations: classpath:/config
         git:
-          uri: https://github.com/ihuaylupo/config.git
-          searchPaths: licensingservice
-    
-server:
-  port: 8071
+          uri: https://github.com/Nicholas-Bava/elearning_config.git
+          username: ${GITHUB_USERNAME:defaultUsername}
+          password: ${GITHUB_PASSWORD:defaultPassword}
 
+server:
+  port: 8089
+
+debug: false
 
 #Enable all Spring Boot Actuator endpoints.
 management:
