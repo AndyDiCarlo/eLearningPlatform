@@ -7,8 +7,6 @@ spring:
   cloud:
     config:
       server:
-        #native:
-        #search-locations: classpath:/config
         git:
           uri: https://github.com/Nicholas-Bava/elearning_config.git
           username: ${GITHUB_USERNAME:defaultUsername}
