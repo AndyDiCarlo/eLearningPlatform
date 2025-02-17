@@ -18,7 +18,7 @@ import com.elearning.course.model.Course;
 import com.elearning.course.service.CourseService;
 
 @RestController
-@RequestMapping(value = "/v1/elearning/courses")
+@RequestMapping(value = "/courses")
 public class CourseController {
     @Autowired
     CourseService courseService;

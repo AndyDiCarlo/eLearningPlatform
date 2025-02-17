@@ -1,7 +1,6 @@
 package com.elearning.user.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,7 @@ import com.elearning.user.model.User;
 import com.elearning.user.service.UserService;
 
 @RestController
-@RequestMapping(value="v1/elearning/user")
+@RequestMapping(value="/users")
 public class UserController {
 
 	@Autowired
