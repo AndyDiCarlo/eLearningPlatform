@@ -1,8 +1,6 @@
 version: "3.8"
 
 services:
-  # PostgreSQL for User Service
-
   # PostgreSQL for Enrollment Service
   enrollmentdb:
     image: postgres:latest
@@ -25,6 +23,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  # PostgreSQL for User Service
   userdb:
     image: postgres:latest
     container_name: userdb
@@ -47,7 +46,7 @@ services:
       timeout: 5s
       retries: 5
 
-      # PostgreSQL for Course Service
+  # PostgreSQL for Course Service
   coursedb:
     image: postgres:latest
     container_name: coursedb
