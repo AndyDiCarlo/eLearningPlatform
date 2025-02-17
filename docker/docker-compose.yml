@@ -53,8 +53,8 @@ services:
     ports:
       - "5434:5432"
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
+      POSTGRES_USER: prod
+      POSTGRES_PASSWORD: prod
       POSTGRES_DB: courseservice_db
     volumes:
       - ./sql/init_course.sql:/docker-entrypoint-initdb.d/1-init_course.sql
@@ -64,7 +64,7 @@ services:
         aliases:
           - "coursedb"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U dev -d courseservice_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U prod -d courseservice_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -138,13 +138,11 @@ services:
       - "8082:8080"  # Maps host 8082 to container 8080
     environment:
       SPRING_APPLICATION_NAME: course-service
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://coursedb:5432/courseservice_db
-      SPRING_DATASOURCE_USERNAME: dev
-      SPRING_DATASOURCE_PASSWORD: dev
       GITHUB_USERNAME: "Nicholas-Bava"
       GITHUB_PASSWORD: "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"
     depends_on:
