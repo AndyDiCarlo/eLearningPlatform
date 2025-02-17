@@ -26,6 +26,7 @@
     <modules>
         <module>configserver</module>
         <module>user-service</module>
+        <module>enrollment-service</module>
     </modules>
     <build>
         <plugins>

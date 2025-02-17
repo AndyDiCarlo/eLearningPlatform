@@ -3,7 +3,7 @@ Course project implementing an e-learning system with microservices
 #
 ### To build the code as a docker image, open a command-line window and execute the following command:
 ```
-$ mvn clean package dockerfile:build
+$ mvn clean package dockerfile:build -DskipTests
 ```
 
 ### Use docker-compose to start the actual image.  To start the docker image, run the following command: 
