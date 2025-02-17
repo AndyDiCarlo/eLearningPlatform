@@ -11,6 +11,12 @@ $ mvn clean package dockerfile:build -DskipTests
 $ docker-compose -f docker/docker-compose.yml up
 ```
 #
+### Links to Repos
+Main Repo: https://github.com/AndyDiCarlo/eLearningPlatform
+
+Configuration Repo: https://github.com/Nicholas-Bava/elearning_config
+
+#
 Project by Andy DiCarlo and Nick Bava
 
 Baylor MS Computer Science, CSI 5347
