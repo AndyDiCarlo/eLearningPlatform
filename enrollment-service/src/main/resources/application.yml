@@ -8,6 +8,3 @@ spring:
     cloud:
         config:
             uri: http://configserver:8089
-    autoconfigure:
-        exclude:
-        - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
