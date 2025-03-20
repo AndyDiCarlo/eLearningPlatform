@@ -188,6 +188,19 @@ services:
         aliases:
           - "enrollmentservice"
 
+  eurekaserver:
+    image: elearning/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
 networks:
   backend:
     driver: bridge

@@ -1,0 +1,13 @@
+spring:
+    application:
+        name: enrollment-service
+    config:
+        import: "optional:configserver:http://configserver:8089"
+    profiles:
+        active: dev
+    cloud:
+        config:
+            uri: http://configserver:8089
+    autoconfigure:
+        exclude:
+        - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration

@@ -25,8 +25,10 @@
 
     <modules>
         <module>configserver</module>
-        <module>user-service</module>
+        <module>course-service</module>
         <module>enrollment-service</module>
+        <module>eurekaserver</module>
+        <module>user-service</module>
     </modules>
     <build>
         <plugins>
