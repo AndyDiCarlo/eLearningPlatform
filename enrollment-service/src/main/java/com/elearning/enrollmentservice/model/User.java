@@ -19,7 +19,8 @@ import java.util.List;
 public class User {
 
     @Id
-    private Long id;
+    @Column(name = "user_id", nullable = false)
+    private String userId;
 
     @Column(nullable = false, unique = true)
     @NotBlank(message = "Username is required")
@@ -29,11 +30,15 @@ public class User {
     @NotBlank(message = "Email is required")
     private String email;
 
+    @Column(name= "first_name")
     @NotBlank(message = "First name is required")
     private String firstName;
+
+    @Column(name= "last_name")
     @NotBlank(message = "Last name is required")
     private String lastName;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user")
@@ -44,8 +49,8 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public User(Long id, String username, String email, String firstName, String lastName) {
-        this.id = id;
+    public User(String userId, String username, String email, String firstName, String lastName) {
+        this.userId = userId;
         this.username = username;
         this.email = email;
         this.firstName = firstName;

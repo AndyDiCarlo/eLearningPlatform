@@ -2,6 +2,7 @@ package com.elearning.user.service;
 
 import java.util.UUID;
 
+import com.elearning.user.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,22 @@ public class UserService {
 			throw new IllegalArgumentException(String.format(messages.getMessage("user.search.error.message", null, null),userId));
 		}
 		return user.withComment(config.getProperty());
+	}
+
+	public UserDTO getUserDTO(String userId){
+		User user = userRepository.findByUserId(userId);
+
+        return mapUserToDTO(user);
+	}
+
+	private UserDTO mapUserToDTO (User user){
+		UserDTO userDTO = new UserDTO();
+		userDTO.setUserId(user.getUserId());
+		userDTO.setUsername(user.getUsername());
+		userDTO.setEmail(user.getEmail());
+		userDTO.setFirstName(user.getFirstName());
+		userDTO.setLastName(user.getLastName());
+		return userDTO;
 	}
 
 	public User createUser(User user){

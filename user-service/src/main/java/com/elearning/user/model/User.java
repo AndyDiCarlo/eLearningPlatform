@@ -17,6 +17,9 @@ public class User extends RepresentationModel<User> {
 	@Column(name = "user_id", nullable = false)
 	private String userId;
 
+	@Column(name = "username", nullable = false)
+	private String username;
+
 	@Column(name = "first_name", nullable = false)
 	private String firstName;
 
@@ -25,6 +28,21 @@ public class User extends RepresentationModel<User> {
 
 	@Column(name="email")
 	private String email;
+
+	@Column(name="phone")
+	private String phone;
+
+	@Column(name="street_address")
+	private String streetAddress;
+
+	@Column(name="city")
+	private String city;
+
+	@Column(name="state")
+	private String state;
+
+	@Column(name="zip")
+	private String zip;
 
 	@Column(name="comment")
 	private String comment;

@@ -1,5 +1,6 @@
 package com.elearning.enrollmentservice.service;
 
+import com.elearning.enrollmentservice.config.ServiceConfig;
 import com.elearning.enrollmentservice.dto.EnrollmentRequest;
 import com.elearning.enrollmentservice.dto.UserDTO;
 import com.elearning.enrollmentservice.dto.CourseDTO;
@@ -9,7 +10,13 @@ import com.elearning.enrollmentservice.model.Course;
 import com.elearning.enrollmentservice.repository.EnrollmentRepository;
 import com.elearning.enrollmentservice.repository.UserRepository;
 import com.elearning.enrollmentservice.repository.CourseRepository;
+import com.elearning.enrollmentservice.service.client.CourseFeignClient;
+import com.elearning.enrollmentservice.service.client.UserDiscoveryClient;
+import com.elearning.enrollmentservice.service.client.UserFeignClient;
+import com.elearning.enrollmentservice.service.client.UserRestTemplateClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.config.annotation.web.oauth2.login.UserInfoEndpointDsl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,14 +28,32 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private final MessageSource messages;
+    private final ServiceConfig config;
+    private final UserDiscoveryClient userDiscoveryClient;
+    private final UserFeignClient userFeignClient;
+    private final CourseFeignClient courseFeignClient;
+    private final UserRestTemplateClient userRestTemplateClient;
 
     @Autowired
     public EnrollmentService(EnrollmentRepository enrollmentRepository,
                              UserRepository userRepository,
-                             CourseRepository courseRepository) {
+                             CourseRepository courseRepository,
+                             MessageSource messages,
+                             ServiceConfig serviceConfig,
+                             UserDiscoveryClient userDiscoveryClient,
+                             UserFeignClient userFeignClient,
+                             CourseFeignClient courseFeignClient,
+                             UserRestTemplateClient userRestTemplateClient) {
         this.enrollmentRepository = enrollmentRepository;
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
+        this.messages = messages;
+        this.config = serviceConfig;
+        this.userDiscoveryClient = userDiscoveryClient;
+        this.userFeignClient = userFeignClient;
+        this.courseFeignClient = courseFeignClient;
+        this.userRestTemplateClient = userRestTemplateClient;
     }
 
     /**
@@ -36,7 +61,7 @@ public class EnrollmentService {
      */
     private User mapToUser(UserDTO userDTO) {
         User user = new User();
-        user.setId(userDTO.getId());
+        user.setUserId(userDTO.getUserId());
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setFirstName(userDTO.getFirstName());
@@ -50,7 +75,7 @@ public class EnrollmentService {
      */
     private Course mapToCourse(CourseDTO courseDTO) {
         Course course = new Course();
-        course.setId(courseDTO.getId());
+        course.setCourseId(courseDTO.getCourseId());
         course.setTitle(courseDTO.getTitle());
         course.setDescription(courseDTO.getDescription());
         course.setInstructor(courseDTO.getInstructor());
@@ -64,27 +89,43 @@ public class EnrollmentService {
      * If the user or course does not already exist in the repository, it creates one using only the desired attributes.
      */
     public Enrollment enrollStudent(EnrollmentRequest enrollmentRequest) {
-        UserDTO userDTO = enrollmentRequest.getUser();
-        CourseDTO courseDTO = enrollmentRequest.getCourse();
+        //UserDTO userDTO = enrollmentRequest.getUser();
+        //CourseDTO courseDTO = enrollmentRequest.getCourse();
         String status = enrollmentRequest.getStatus();
 
         // Check if the user exists; if not, map and save the abbreviated version.
-        User user = userRepository.findById(userDTO.getId()).orElse(null);
+        User user = userRepository.findByUserId(enrollmentRequest.getUserId()).orElse(null);
         if (user == null) {
-            user = mapToUser(userDTO);
+            user = retrieveUserInfo(enrollmentRequest.getUserId());
             user = userRepository.save(user);
         }
 
         // Check if the course exists; if not, map and save the abbreviated version.
-        Course course = courseRepository.findById(courseDTO.getId()).orElse(null);
+        Course course = courseRepository.findByCourseId(enrollmentRequest.getCourseId()).orElse(null);
         if (course == null) {
-            course = mapToCourse(courseDTO);
+            course = retrieveCourseInfo(enrollmentRequest.getCourseId());
             course = courseRepository.save(course);
         }
 
         // Create and save the new enrollment.
         Enrollment enrollment = new Enrollment(user, course, status);
         return enrollmentRepository.save(enrollment);
+    }
+
+    private User retrieveUserInfo(String userId) {
+        User user = null;
+
+        user = mapToUser(userFeignClient.getUserDTO(userId));
+
+        return user;
+    }
+
+    private Course retrieveCourseInfo(String courseId) {
+        Course course = null;
+
+        course = mapToCourse(courseFeignClient.getCourseDTO(courseId));
+
+        return course;
     }
 
     public List<Enrollment> getAllEnrollments() {
@@ -107,11 +148,11 @@ public class EnrollmentService {
         enrollmentRepository.deleteById(id);
     }
 
-    public List<Enrollment> getEnrollmentsByUserId(Long userId) {
-        return enrollmentRepository.findByUser_Id(userId);
+    public List<Enrollment> getEnrollmentsByUserId(String userId) {
+        return enrollmentRepository.findByUser_UserId(userId);
     }
 
-    public List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
-        return enrollmentRepository.findByCourse_Id(courseId);
+    public List<Enrollment> getEnrollmentsByCourseId(String courseId) {
+        return enrollmentRepository.findByCourse_CourseId(courseId);
     }
 }

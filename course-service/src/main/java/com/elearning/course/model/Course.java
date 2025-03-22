@@ -26,8 +26,8 @@ public class Course {
     @Column(name = "description", length = 1000)
     private String description;
 
-    @Column(name = "instructor_id", nullable = false)
-    private String instructorId;
+    @Column(name = "instructor", nullable = false)
+    private String instructor;
 
     @Column(name = "course_code", unique = true)
     private String courseCode;
@@ -36,8 +36,8 @@ public class Course {
     @Column(name = "status", nullable = false)
     private CourseStatus status = CourseStatus.DRAFT;
 
-    @Column(name = "max_users")
-    private Integer maxUsers;
+    @Column(name = "max_enrollments")
+    private Integer maxEnrollments;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

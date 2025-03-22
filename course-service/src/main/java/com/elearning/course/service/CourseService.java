@@ -3,6 +3,7 @@ package com.elearning.course.service;
 import java.util.UUID;
 import java.util.List;
 
+import com.elearning.course.dto.CourseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,12 @@ public class CourseService {
         return course;
     }
 
+    public CourseDTO getCourseDTO(String courseId){
+        Course course = courseRepository.findByCourseId(courseId);
+
+        return mapToCourseDTO(course);
+    }
+
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
@@ -57,5 +64,16 @@ public class CourseService {
         responseMessage = String.format(messages.getMessage("course.delete.message", null, null),courseId);
         return responseMessage;
 
+    }
+
+    private CourseDTO mapToCourseDTO(Course course){
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourseId(course.getCourseId());
+        courseDTO.setDescription(course.getDescription());
+        courseDTO.setTitle(course.getTitle());
+        courseDTO.setInstructor(course.getInstructor());
+        courseDTO.setMaxEnrollments(course.getMaxEnrollments());
+
+        return courseDTO;
     }
 }

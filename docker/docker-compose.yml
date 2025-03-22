@@ -122,6 +122,8 @@ services:
         condition: service_started
       eurekaserver:
         condition: service_started
+      keycloak:
+        condition: service_started
     networks:
       backend:
         aliases:
@@ -153,6 +155,8 @@ services:
       configserver:
         condition: service_started
       eurekaserver:
+        condition: service_started
+      keycloak:
         condition: service_started
     networks:
       backend:
@@ -188,6 +192,8 @@ services:
       configserver:
         condition: service_started
       eurekaserver:
+        condition: service_started
+      keycloak:
         condition: service_started
     networks:
       backend:
@@ -264,8 +270,11 @@ services:
       KC_HOSTNAME: keycloak
     ports:
       - "8080:8080"
+    volumes:
+      - ./elearn-realm.json:/opt/keycloak/data/import/elearn-realm.json
     command:
       - "start-dev"
+      - "--import-realm"
     networks:
       backend:
         aliases:

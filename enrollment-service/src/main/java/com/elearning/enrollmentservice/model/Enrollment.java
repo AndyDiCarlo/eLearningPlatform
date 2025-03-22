@@ -25,7 +25,9 @@ public class Enrollment {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @Column(name = "enrollment_date")
     private LocalDateTime enrollmentDate;
+
     private String status;
 
     public Enrollment() {

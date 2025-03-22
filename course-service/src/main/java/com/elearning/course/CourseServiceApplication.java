@@ -26,6 +26,7 @@ public class CourseServiceApplication {
 	// 	return localeResolver;
 	// }
 	@Bean
+	@Primary
 	public ResourceBundleMessageSource messageSource() {
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 		messageSource.setUseCodeAsDefaultMessage(true);

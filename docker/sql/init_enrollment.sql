@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS courses;
 
 -- Create the "users" table
 CREATE TABLE users (
-                       id BIGINT PRIMARY KEY,
+                       user_id VARCHAR(255) PRIMARY KEY,
                        username VARCHAR(255) NOT NULL UNIQUE,
                        email VARCHAR(255) NOT NULL UNIQUE,
                        first_name VARCHAR(255) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE users (
 
 -- Create the "courses" table
 CREATE TABLE courses (
-                         id BIGINT PRIMARY KEY,
+                         course_id VARCHAR(255) PRIMARY KEY,
                          title VARCHAR(255) NOT NULL,
                          description VARCHAR(2000),
                          instructor VARCHAR(255) NOT NULL,
@@ -28,10 +28,10 @@ CREATE TABLE courses (
 -- Create the "enrollments" table
 CREATE TABLE enrollments (
                              id BIGSERIAL PRIMARY KEY,
-                             user_id BIGINT NOT NULL,
-                             course_id BIGINT NOT NULL,
+                             user_id VARCHAR(255) NOT NULL,
+                             course_id VARCHAR(255) NOT NULL,
                              enrollment_date TIMESTAMP,
                              status VARCHAR(50),
-                             CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id),
-                             CONSTRAINT fk_course FOREIGN KEY(course_id) REFERENCES courses(id)
+                             CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(user_id), 
+                             CONSTRAINT fk_course FOREIGN KEY(course_id) REFERENCES courses(course_id)
 );

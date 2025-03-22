@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EnrollmentRequest {
-    private UserDTO user;
-    private CourseDTO course;
+    private String userId;
+    private String courseId;
     private String status;
 }

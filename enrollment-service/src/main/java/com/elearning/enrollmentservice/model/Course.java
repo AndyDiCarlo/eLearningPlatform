@@ -19,7 +19,8 @@ import java.util.List;
 public class Course {
 
     @Id
-    private Long id;
+    @Column(name = "course_id", nullable = false)
+    private String courseId;
 
     @Column(nullable = false)
     @NotBlank(message = "Title is required")
@@ -32,12 +33,16 @@ public class Course {
     @NotBlank(message = "Instructor is required")
     private String instructor;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "max_enrollments")
     private Integer maxEnrollments;
 
+    @Column(name = "start_date")
     private LocalDateTime startDate;
+
+    @Column(name = "end_date")
     private LocalDateTime endDate;
 
     @OneToMany(mappedBy = "course")
@@ -49,8 +54,8 @@ public class Course {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Course(Long id, String title, String description, String instructor) {
-        this.id = id;
+    public Course(String courseId, String title, String description, String instructor) {
+        this.courseId = courseId;
         this.title = title;
         this.description = description;
         this.instructor = instructor;
