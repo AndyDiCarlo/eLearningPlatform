@@ -28,4 +28,4 @@ COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 # Execute the application by specifying the main class
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.elearning.eurekaserver.EurekaServerApplication"]
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.elearning.eureka.EurekaServerApplication"]

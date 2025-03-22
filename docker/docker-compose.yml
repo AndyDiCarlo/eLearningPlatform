@@ -83,7 +83,7 @@ services:
     environment:
       SERVER_PORT: "8089"
       GITHUB_USERNAME: "Nicholas-Bava"
-      GITHUB_PASSWORD: "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"
+      GITHUB_PASSWORD: "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"
     networks:
       backend:
         aliases:
@@ -114,11 +114,13 @@ services:
       SPRING_DATASOURCE_USERNAME: dev
       SPRING_DATASOURCE_PASSWORD: dev
       GITHUB_USERNAME: "Nicholas-Bava"
-      GITHUB_PASSWORD: "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"
+      GITHUB_PASSWORD: "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"
     depends_on:
       userdb:
         condition: service_healthy
       configserver:
+        condition: service_started
+      eurekaserver:
         condition: service_started
     networks:
       backend:
@@ -144,11 +146,13 @@ services:
       CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://coursedb:5432/courseservice_db
       GITHUB_USERNAME: "Nicholas-Bava"
-      GITHUB_PASSWORD: "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"
+      GITHUB_PASSWORD: "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"
     depends_on:
       coursedb:
         condition: service_healthy
       configserver:
+        condition: service_started
+      eurekaserver:
         condition: service_started
     networks:
       backend:
@@ -175,9 +179,38 @@ services:
       SPRING_DATASOURCE_USERNAME: dev
       SPRING_DATASOURCE_PASSWORD: dev
       GITHUB_USERNAME: "Nicholas-Bava"
-      GITHUB_PASSWORD: "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"
+      GITHUB_PASSWORD: "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"
     ports:
       - "8083:8080"
+    depends_on:
+      enrollmentdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "enrollmentservice"
+
+  eurekaserver:
+    build:
+      context: "../eurekaserver"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/eurekaserver-0.0.1-SNAPSHOT.jar
+    image: elearning/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    environment:
+      SPRING_APPLICATION_NAME: eureka-server
+      EUREKA_INSTANCE_HOSTNAME: eurekaserver
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+      CONFIGSERVER_URI: "http://configserver:8089"
+      CONFIGSERVER_PORT: "8089"
+      GITHUB_USERNAME: "Nicholas-Bava"
+      GITHUB_PASSWORD: "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"
     depends_on:
       enrollmentdb:
         condition: service_healthy
@@ -186,21 +219,58 @@ services:
     networks:
       backend:
         aliases:
-          - "enrollmentservice"
+          - "eurekaserver"
 
-  eurekaserver:
-    image: elearning/eurekaserver:0.0.1-SNAPSHOT
+  gatewayserver:
+    build:
+      context: "../gatewayserver"
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/gatewayserver-0.0.1-SNAPSHOT.jar
+    image: ostock/gatewayserver:0.0.1-SNAPSHOT
     ports:
-      - "8070:8070"
+      - "8072:8072"
+    environment:
+      PROFILE: "default"
+      SERVER_PORT: "8072"
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
+      CONFIGSERVER_URI: "http://configserver:8089"
+      EUREKASERVER_URI: "http://eurekaserver:8070/eureka/"
+      EUREKASERVER_PORT: "8070"
+      CONFIGSERVER_PORT: "8089"
+      ENCRYPT_KEY: "IMSYMMETRIC"
+      SPRING_CLOUD_CONFIG_FAIL_FAST: "true"
+      SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING: "true"
     depends_on:
-      database:
+      enrollmentdb:
         condition: service_healthy
       configserver:
+        condition: service_started
+      eurekaserver:
         condition: service_started
     networks:
       backend:
         aliases:
-          - "eurekaserver"
+          - "gateway"
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:24.0.0
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: dev-file
+      KC_HEALTH_ENABLED: true
+      KC_HOSTNAME: keycloak
+    ports:
+      - "8080:8080"
+    command:
+      - "start-dev"
+    networks:
+      backend:
+        aliases:
+          - "keycloak"
+    restart: on-failure:1
 networks:
   backend:
     driver: bridge

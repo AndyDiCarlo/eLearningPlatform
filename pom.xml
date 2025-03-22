@@ -29,6 +29,7 @@
         <module>enrollment-service</module>
         <module>eurekaserver</module>
         <module>user-service</module>
+        <module>gatewayserver</module>
     </modules>
     <build>
         <plugins>
