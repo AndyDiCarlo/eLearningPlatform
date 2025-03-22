@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/e-learning-parent-pom.iml" filepath="$PROJECT_DIR$/e-learning-parent-pom.iml" />
+      <module fileurl="file://$PROJECT_DIR$/keycloak_service/keycloak_service.iml" filepath="$PROJECT_DIR$/keycloak_service/keycloak_service.iml" />
     </modules>
   </component>
 </project>

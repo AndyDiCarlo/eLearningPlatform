@@ -280,6 +280,34 @@ services:
         aliases:
           - "keycloak"
     restart: on-failure:1
+
+  keycloak-service:
+    build:
+      context: ../keycloak_service
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - keycloak
+    environment:
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - TARGET_REALM=elearn-realm
+    networks:
+      backend:
+        aliases:
+          - "keycloakservice"
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
+    networks:
+      backend:
+        aliases:
+          - "mailhog"
 networks:
   backend:
     driver: bridge
