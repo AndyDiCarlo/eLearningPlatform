@@ -12,6 +12,11 @@ import com.elearning.course.config.ServiceConfig;
 import com.elearning.course.model.Course;
 import com.elearning.course.repository.CourseRepository;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
+
 @Service
 public class CourseService {
 
@@ -24,7 +29,10 @@ public class CourseService {
     @Autowired
     ServiceConfig config;
 
-
+    @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
+    @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
+    @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
     public Course getCourse(String courseId){
         Course course = courseRepository.findByCourseId(courseId);
         if (null == course) {
@@ -43,6 +51,10 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
+    @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
+    @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
+    @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
     public Course createCourse(Course course){
         course.setCourseId(UUID.randomUUID().toString());
         courseRepository.save(course);
@@ -50,12 +62,20 @@ public class CourseService {
         return course;
     }
 
+    @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
+    @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
+    @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
     public Course updateCourse(Course course){
         courseRepository.save(course);
 
         return course;
     }
 
+    @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
+    @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
+    @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
     public String deleteCourse(String courseId){
         String responseMessage = null;
         Course course = new Course();
@@ -75,5 +95,14 @@ public class CourseService {
         courseDTO.setMaxEnrollments(course.getMaxEnrollments());
 
         return courseDTO;
+    }
+
+    public Course courseFallback() {
+        Course course = new Course();
+        course.setCourseId("0");
+        course.setTitle("null");
+        course.setInstructor("null");
+        course.setDescription("Unable to access users at this time, please try again.");
+        return course;
     }
 }

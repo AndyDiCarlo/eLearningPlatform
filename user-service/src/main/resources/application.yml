@@ -8,3 +8,49 @@ spring:
     cloud:
         config: 
             uri: http://configserver:8089
+
+
+
+resilience4j:
+    circuitbreaker:
+        instances:
+            userService:
+                register-health-indicator: true
+                minimum-number-of-calls: 5
+                permitted-number-of-calls-in-half-open-state: 3
+                automatic-transition-from-open-to-half-open-enabled: true
+                wait-duration-in-open-state: 5s
+                failure-rate-threshold: 50
+                record-exceptions:
+                    - org.springframework.web.client.RestClientException
+                    - java.io.IOException
+                    - java.util.concurrent.TimeoutException
+
+
+resilience4j.ratelimiter:
+    instances:
+        rateLimiterUserService:
+            limit-for-period: 5
+            limit-refresh-period: 5000
+            timeout-duration: 1000ms
+
+resilience4j.retry:
+    instances:
+        retryUserService:
+            max-attempts: 5
+            wait-duration: 10000
+            retry-exceptions:
+                - java.util.concurrent.TimeoutException
+
+resilience4j.bulkhead:
+    instances:
+        bulkheadUserService:
+            max-wait-duration: 2ms
+            max-concurrent-calls: 20
+
+resilience4j.thread-pool-bulkhead:
+    instances:
+        bulkheadUserService:
+            max-thread-pool-size: 1
+            core-thread-pool-size: 1
+            queue-capacity: 1
