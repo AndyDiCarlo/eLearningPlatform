@@ -60,12 +60,12 @@ resilience4j.bulkhead:
             max-wait-duration: 2ms
             max-concurrent-calls: 20
 
-resilience4j.thread-pool-bulkhead:
-    instances:
-        bulkheadEnrollmentService:
-            max-thread-pool-size: 1
-            core-thread-pool-size: 1
-            queue-capacity: 1
+# resilience4j.thread-pool-bulkhead:
+#     instances:
+#         bulkheadEnrollmentService:
+#             max-thread-pool-size: 1
+#             core-thread-pool-size: 1
+#             queue-capacity: 1
 
 
 management:

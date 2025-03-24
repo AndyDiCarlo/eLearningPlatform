@@ -100,7 +100,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollmentFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "enrollmentFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
     public Enrollment enrollStudent(EnrollmentRequest enrollmentRequest) {
         //UserDTO userDTO = enrollmentRequest.getUser();
         //CourseDTO courseDTO = enrollmentRequest.getCourse();
@@ -144,7 +144,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.SEMAPHORE)
     public List<Enrollment> getAllEnrollments() {
         return enrollmentRepository.findAll();
     }
@@ -152,7 +152,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollmentFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "enrollmentFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
     public Enrollment getEnrollmentById(Long id) {
         return enrollmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Enrollment not found with id " + id));
@@ -161,7 +161,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollmentFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "enrollmentFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
     public Enrollment updateEnrollment(Long id, Enrollment updatedEnrollment) {
         Enrollment enrollment = getEnrollmentById(id);
         enrollment.setStatus(updatedEnrollment.getStatus());
@@ -172,7 +172,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "deleteEnrollmentFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "deleteEnrollmentFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "deleteEnrollmentFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "deleteEnrollmentFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "deleteEnrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
     public void deleteEnrollment(Long id) {
         enrollmentRepository.deleteById(id);
     }
@@ -185,7 +185,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.SEMAPHORE)
     public List<Enrollment> getEnrollmentsByUserId(String userId) {
         return enrollmentRepository.findByUser_UserId(userId);
     }
@@ -193,7 +193,7 @@ public class EnrollmentService {
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.SEMAPHORE)
     public List<Enrollment> getEnrollmentsByCourseId(String courseId) {
         return enrollmentRepository.findByCourse_CourseId(courseId);
     }

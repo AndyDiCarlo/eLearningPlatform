@@ -33,7 +33,7 @@ public class UserService {
 	@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
     @Retry(name = "retryUserService", fallbackMethod = "userFallback")
     @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userFallback")
-    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
 	public User getUser(String userId){
 		User user = userRepository.findByUserId(userId);
 		if (null == user) {
@@ -61,7 +61,7 @@ public class UserService {
 	@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
     @Retry(name = "retryUserService", fallbackMethod = "userFallback")
     @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userFallback")
-    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
 	public User createUser(User user){
 		user.setUserId(UUID.randomUUID().toString());
 		userRepository.save(user);
@@ -72,7 +72,7 @@ public class UserService {
 	@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
     @Retry(name = "retryUserService", fallbackMethod = "userFallback")
     @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userFallback")
-    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
 	public User updateUser(User user){
 		userRepository.save(user);
 
@@ -82,7 +82,7 @@ public class UserService {
 	@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
     @Retry(name = "retryUserService", fallbackMethod = "userFallback")
     @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userFallback")
-    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
 	public String deleteUser(String userId){
 		String responseMessage = null;
 		User user = new User();

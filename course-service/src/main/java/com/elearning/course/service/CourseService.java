@@ -32,7 +32,7 @@ public class CourseService {
     @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
     @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
     @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
-    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.SEMAPHORE)
     public Course getCourse(String courseId){
         Course course = courseRepository.findByCourseId(courseId);
         if (null == course) {
@@ -54,7 +54,7 @@ public class CourseService {
     @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
     @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
     @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
-    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.SEMAPHORE)
     public Course createCourse(Course course){
         course.setCourseId(UUID.randomUUID().toString());
         courseRepository.save(course);
@@ -65,7 +65,7 @@ public class CourseService {
     @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
     @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
     @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
-    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.SEMAPHORE)
     public Course updateCourse(Course course){
         courseRepository.save(course);
 
@@ -75,7 +75,7 @@ public class CourseService {
     @CircuitBreaker(name = "courseService", fallbackMethod = "courseFallback")
     @Retry(name = "retryCourseService", fallbackMethod = "courseFallback")
     @RateLimiter(name = "rateLimiterCourseService", fallbackMethod = "courseFallback")
-    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.THREADPOOL)
+    @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.SEMAPHORE)
     public String deleteCourse(String courseId){
         String responseMessage = null;
         Course course = new Course();
