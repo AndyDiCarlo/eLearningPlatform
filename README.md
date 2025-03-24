@@ -8,7 +8,6 @@ $ mvn clean package dockerfile:build -DskipTests
 
 ### Use docker-compose to start the actual image.  To start the docker image, run the following command: 
 ```
-$ cd docker
 $ docker-compose -f docker/docker-compose.yml up
 ```
 #
