@@ -10,8 +10,8 @@ COPY app.py requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Wait for Keycloak to be ready
-COPY wait-for-it.sh /wait-for-it.sh
+COPY wait-for-it.sh /
 RUN chmod +x /wait-for-it.sh
 
 # Run with gunicorn for production
-CMD ["/wait-for-it.sh", "keycloak:8080", "--", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["C:/Users/dicarloa/Desktop/School/Baylor/Distributed Systems/Project/eLearningPlatform/keycloak_service/wait-for-it.sh", "keycloak:8080", "--", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

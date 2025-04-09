@@ -199,7 +199,7 @@ public class EnrollmentService {
     }
 
     public Enrollment enrollmentFallback(Long id, Enrollment updatedEnrollment, Exception ex) {
-        log.warn("Fallback method called for updating enrollment id: {}", id);
+        log.warn("Fallback method called for accessing enrollment id: {}", id);
         Enrollment enrollment = new Enrollment();
         enrollment.setId((long) 0);
         enrollment.setCourse(null);

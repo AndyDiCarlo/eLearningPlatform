@@ -11,3 +11,12 @@ logging:
     org.springframework.web: WARN
     com.elearning: DEBUG
             
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus

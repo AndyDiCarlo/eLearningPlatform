@@ -80,3 +80,7 @@ management:
     health:
         circuitbreakers:
             enabled: true
+    tracing:
+        sampling:
+            probability: 1.0
+        enabled: true
