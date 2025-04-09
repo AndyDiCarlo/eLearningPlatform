@@ -10,6 +10,8 @@ $ mvn clean package dockerfile:build -DskipTests
 ```
 $ docker-compose -f docker/docker-compose.yml up
 ```
+
+### To use realms effectively, users must be populated into the realm. This is done at localhost:5000 using the created api or by using the Keycloak UI.
 #
 ### Links to Repos
 Main Repo: https://github.com/AndyDiCarlo/eLearningPlatform
