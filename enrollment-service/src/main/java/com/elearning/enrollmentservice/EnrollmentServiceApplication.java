@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Hooks;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,9 @@ import java.util.List;
 public class EnrollmentServiceApplication {
 
     public static void main(String[] args) {
+
+        Hooks.enableAutomaticContextPropagation();
+
         SpringApplication.run(EnrollmentServiceApplication.class, args);
     }
 

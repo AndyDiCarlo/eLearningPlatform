@@ -124,6 +124,10 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      zipkin:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     networks:
       backend:
         aliases:
@@ -158,6 +162,10 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      zipkin:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     networks:
       backend:
         aliases:
@@ -195,6 +203,10 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      zipkin:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     networks:
       backend:
         aliases:
@@ -286,7 +298,7 @@ services:
       context: ../keycloak_service
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5001:5001"
     depends_on:
       - keycloak
     environment:

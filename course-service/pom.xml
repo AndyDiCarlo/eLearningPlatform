@@ -35,6 +35,24 @@
 			<artifactId>micrometer-tracing-bridge-brave</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-observation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>context-propagation</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-reporter-brave</artifactId>
         </dependency>
