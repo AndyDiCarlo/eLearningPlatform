@@ -19,6 +19,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -259,5 +260,45 @@ public class EnrollmentService {
         enrollment.setStatus("Unable to retreive enrollments at this time, please try again.");
         enrollments.add(enrollment);
         return enrollments;
+    }
+
+    @Transactional
+    public void updateLocalUserData(String userId, UserDTO userDTO) {
+        User user = userRepository.findByUserId(userId)
+                .orElse(null);
+
+        if (user != null) {
+            // Update user data
+            user.setUsername(userDTO.getUsername());
+            user.setEmail(userDTO.getEmail());
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setUpdatedAt(LocalDateTime.now());
+
+            userRepository.save(user);
+            log.info("Updated local user data for userId: {}", userId);
+        } else {
+            log.warn("User with ID {} not found in local database", userId);
+        }
+    }
+
+    @Transactional
+    public void updateLocalCourseData(String courseId, CourseDTO courseDTO) {
+        Course course = courseRepository.findByCourseId(courseId)
+                .orElse(null);
+
+        if (course != null) {
+            // Update course data
+            course.setTitle(courseDTO.getTitle());
+            course.setDescription(courseDTO.getDescription());
+            course.setInstructor(courseDTO.getInstructor());
+            course.setMaxEnrollments(courseDTO.getMaxEnrollments());
+            course.setUpdatedAt(LocalDateTime.now());
+
+            courseRepository.save(course);
+            log.info("Updated local course data for courseId: {}", courseId);
+        } else {
+            log.warn("Course with ID {} not found in local database", courseId);
+        }
     }
 }
