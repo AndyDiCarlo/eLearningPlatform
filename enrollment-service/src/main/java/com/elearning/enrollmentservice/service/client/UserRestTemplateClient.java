@@ -23,21 +23,5 @@ public class UserRestTemplateClient {
                 .block(); // Blocks until the response is available
     }
 
-/*
-    @Autowired
-    private KeycloakRestTemplate restTemplate;
-
-    public User getUser(String userId){
-        ResponseEntity<User> restExchange = 
-                restTemplate.exchange(
-                   "http://gateway:8072/user/v1/user/{userId}",
-                   HttpMethod.GET,
-                   null, User.class, userId);
-
-        return restExchange.getBody();
-    }
-
- */
-
     
 }
