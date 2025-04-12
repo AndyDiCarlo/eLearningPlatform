@@ -42,7 +42,7 @@ resilience4j:
 resilience4j.ratelimiter:
     instances:
         rateLimiterEnrollmentService:
-            limit-for-period: 5
+            limit-for-period: 50
             limit-refresh-period: 5000
             timeout-duration: 1000ms
 
@@ -80,3 +80,7 @@ management:
     health:
         circuitbreakers:
             enabled: true
+    tracing:
+        sampling:
+            probability: 1.0
+        enabled: true

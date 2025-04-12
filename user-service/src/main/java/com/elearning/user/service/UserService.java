@@ -1,5 +1,6 @@
 package com.elearning.user.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,12 +18,19 @@ import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import com.elearning.user.config.ServiceConfig;
 import com.elearning.user.model.User;
 import com.elearning.user.repository.UserRepository;
+import org.springframework.kafka.core.KafkaTemplate;
+import com.elearning.user.events.UserChangeEvent;
 
 @Service
 public class UserService {
 
 	@Autowired
 	MessageSource messages;
+
+	private static final String USER_TOPIC = "user-changes";
+
+	@Autowired
+	private KafkaTemplate<String, UserChangeEvent> kafkaTemplate;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -75,6 +83,13 @@ public class UserService {
     @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
 	public User updateUser(User user){
 		userRepository.save(user);
+
+		UserChangeEvent event = new UserChangeEvent(
+				user.getUserId(),
+				"UPDATE",
+				LocalDateTime.now()
+		);
+		kafkaTemplate.send(USER_TOPIC, user.getUserId(), event);
 
 		return user.withComment(config.getProperty());
 	}

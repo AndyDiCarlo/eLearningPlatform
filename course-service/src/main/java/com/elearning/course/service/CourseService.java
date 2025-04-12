@@ -1,11 +1,14 @@
 package com.elearning.course.service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.List;
 
 import com.elearning.course.dto.CourseDTO;
+import com.elearning.course.events.CourseChangeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.elearning.course.config.ServiceConfig;
@@ -19,6 +22,11 @@ import io.github.resilience4j.retry.annotation.Retry;
 
 @Service
 public class CourseService {
+
+    private static final String COURSE_TOPIC = "course-changes";
+
+    @Autowired
+    private KafkaTemplate<String, CourseChangeEvent> kafkaTemplate;
 
     @Autowired
     MessageSource messages;
@@ -68,6 +76,13 @@ public class CourseService {
     @Bulkhead(name = "bulkheadCourseService", fallbackMethod = "courseFallback", type = Bulkhead.Type.SEMAPHORE)
     public Course updateCourse(Course course){
         courseRepository.save(course);
+
+        CourseChangeEvent event = new CourseChangeEvent(
+                course.getCourseId(),
+                "UPDATE",
+                LocalDateTime.now()
+        );
+        kafkaTemplate.send(COURSE_TOPIC, course.getCourseId(), event);
 
         return course;
     }

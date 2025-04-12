@@ -14,7 +14,7 @@ import com.elearning.enrollmentservice.model.User;
 public interface CourseFeignClient {
     @RequestMapping(
             method= RequestMethod.GET,
-            value="/courses/dto/{courseId}",
+            value="/internal/courses/{courseId}",
             consumes="application/json")
     CourseDTO getCourseDTO(@PathVariable("courseId") String courseId);
 }

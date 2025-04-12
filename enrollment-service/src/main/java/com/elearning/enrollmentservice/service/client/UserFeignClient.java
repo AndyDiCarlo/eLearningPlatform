@@ -14,7 +14,7 @@ import com.elearning.enrollmentservice.model.User;
 public interface UserFeignClient {
     @RequestMapping(
             method= RequestMethod.GET,
-            value="/users/dto/{userId}",
+            value="/internal/users/{userId}",
             consumes="application/json")
     UserDTO getUserDTO(@PathVariable("userId") String userId);
 }

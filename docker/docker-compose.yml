@@ -8,8 +8,8 @@ services:
     ports:
       - "5435:5432"
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: enrollmentservice_db
     volumes:
       - ./sql/init_enrollment.sql:/docker-entrypoint-initdb.d/1-init_enrollment.sql
@@ -30,8 +30,8 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: userservice_db
     volumes:
       - ./sql/init_user.sql:/docker-entrypoint-initdb.d/1-init_user.sql
@@ -53,8 +53,8 @@ services:
     ports:
       - "5434:5432"
     environment:
-      POSTGRES_USER: prod
-      POSTGRES_PASSWORD: prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: courseservice_db
     volumes:
       - ./sql/init_course.sql:/docker-entrypoint-initdb.d/1-init_course.sql
@@ -111,8 +111,8 @@ services:
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://userdb:5432/userservice_db
-      SPRING_DATASOURCE_USERNAME: dev
-      SPRING_DATASOURCE_PASSWORD: dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       GITHUB_USERNAME: "Nicholas-Bava"
       GITHUB_PASSWORD: "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"
     depends_on:
@@ -124,6 +124,10 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      zipkin:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     networks:
       backend:
         aliases:
@@ -142,7 +146,7 @@ services:
       - "8082:8080"  # Maps host 8082 to container 8080
     environment:
       SPRING_APPLICATION_NAME: course-service
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
@@ -158,6 +162,10 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      zipkin:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     networks:
       backend:
         aliases:
@@ -180,8 +188,8 @@ services:
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://enrollmentdb:5432/enrollmentservice_db
-      SPRING_DATASOURCE_USERNAME: dev
-      SPRING_DATASOURCE_PASSWORD: dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       GITHUB_USERNAME: "Nicholas-Bava"
       GITHUB_PASSWORD: "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"
     ports:
@@ -195,6 +203,10 @@ services:
         condition: service_started
       keycloak:
         condition: service_started
+      zipkin:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     networks:
       backend:
         aliases:
@@ -233,7 +245,7 @@ services:
       dockerfile: Dockerfile
       args:
         JAR_FILE: target/gatewayserver-0.0.1-SNAPSHOT.jar
-    image: ostock/gatewayserver:0.0.1-SNAPSHOT
+    image: elearning/gatewayserver:0.0.1-SNAPSHOT
     ports:
       - "8072:8072"
     environment:
@@ -286,7 +298,7 @@ services:
       context: ../keycloak_service
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5001:5001"
     depends_on:
       - keycloak
     environment:
@@ -308,6 +320,106 @@ services:
       backend:
         aliases:
           - "mailhog"
+
+  zipkin: 
+    image: openzipkin/zipkin 
+    container_name: zipkin
+    depends_on: 
+      - elasticsearch
+    environment: 
+      - STORAGE_TYPE=elasticsearch
+      - "ES_HOSTS=elasticsearch:9300"
+    ports:
+      - "9411:9411"
+    networks:
+      backend:
+        aliases:
+          - "zipkin"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9300:9300
+      - 9200:9200
+    networks:
+      backend:
+        aliases:
+          - "elasticsearch"
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.7.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: "http://elasticsearch:9300"
+    ports:
+      - 5601:5601
+    networks:
+      backend:
+        aliases:
+          - "kibana"
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.7.0
+    container_name: logstash
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - ./config:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+    networks:
+      backend:
+        aliases:
+          - "logstash"
+    healthcheck:
+      test: bin/logstash -t
+      interval: 60s
+      timeout: 50s
+      retries: 5
+    depends_on:
+      - elasticsearch
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - backend
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - backend
+
+volumes:
+  esdata1:
+    driver: local
 networks:
   backend:
     driver: bridge

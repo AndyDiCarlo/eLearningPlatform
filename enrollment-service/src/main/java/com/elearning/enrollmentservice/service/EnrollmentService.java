@@ -19,6 +19,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,10 +98,10 @@ public class EnrollmentService {
      * Enrolls a student using a full EnrollmentRequest (which contains abbreviated User and Course DTOs).
      * If the user or course does not already exist in the repository, it creates one using only the desired attributes.
      */
-    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollmentFallback")
-    @Retry(name = "retryEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
+    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollStudentFallback")
+    @Retry(name = "retryEnrollmentService", fallbackMethod = "enrollStudentFallback")
+    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "enrollStudentFallback")
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollStudentFallback", type = Bulkhead.Type.SEMAPHORE)
     public Enrollment enrollStudent(EnrollmentRequest enrollmentRequest) {
         //UserDTO userDTO = enrollmentRequest.getUser();
         //CourseDTO courseDTO = enrollmentRequest.getCourse();
@@ -141,6 +142,15 @@ public class EnrollmentService {
         return course;
     }
 
+    public Enrollment enrollStudentFallback(EnrollmentRequest request, Throwable t) {
+        log.warn("Fallback method called for enrollment request: {}", request.getUserId(), t);
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId((long) 0);
+        enrollment.setCourse(null);
+        enrollment.setStatus("Unable to process enrollment at this time, please try again later.");
+        return enrollment;
+    }
+
     @CircuitBreaker(name = "enrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @Retry(name = "retryEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
     @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
@@ -158,14 +168,14 @@ public class EnrollmentService {
                 .orElseThrow(() -> new RuntimeException("Enrollment not found with id " + id));
     }
 
-    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "enrollmentFallback")
-    @Retry(name = "retryEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "enrollmentFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "enrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
+    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "updateEnrollmentFallback")
+    @Retry(name = "retryEnrollmentService", fallbackMethod = "updateEnrollmentFallback")
+    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "updateEnrollmentFallback")
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "updateEnrollmentFallback", type = Bulkhead.Type.SEMAPHORE)
     public Enrollment updateEnrollment(Long id, Enrollment updatedEnrollment) {
         Enrollment enrollment = getEnrollmentById(id);
         enrollment.setStatus(updatedEnrollment.getStatus());
-        // Optionally update user or course details if required.
+
         return enrollmentRepository.save(enrollment);
     }
 
@@ -182,24 +192,58 @@ public class EnrollmentService {
         throw new RuntimeException("Service temporarily unavailable");
     }
 
-    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Retry(name = "retryEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.SEMAPHORE)
+    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "getByUserFallback")
+    @Retry(name = "retryEnrollmentService", fallbackMethod = "getByUserFallback")
+    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "getByUserFallback")
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "getByUserFallback", type = Bulkhead.Type.SEMAPHORE)
     public List<Enrollment> getEnrollmentsByUserId(String userId) {
         return enrollmentRepository.findByUser_UserId(userId);
     }
 
-    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Retry(name = "retryEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "listEnrollmentsFallback")
-    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "listEnrollmentsFallback", type = Bulkhead.Type.SEMAPHORE)
+    @CircuitBreaker(name = "enrollmentService", fallbackMethod = "getByCourseFallback")
+    @Retry(name = "retryEnrollmentService", fallbackMethod = "getByCourseFallback")
+    @RateLimiter(name = "rateLimiterEnrollmentService", fallbackMethod = "getByCourseFallback")
+    @Bulkhead(name = "bulkheadEnrollmentService", fallbackMethod = "getByCourseFallback", type = Bulkhead.Type.SEMAPHORE)
     public List<Enrollment> getEnrollmentsByCourseId(String courseId) {
         return enrollmentRepository.findByCourse_CourseId(courseId);
     }
 
-    public Enrollment enrollmentFallback(Long id, Enrollment updatedEnrollment, Exception ex) {
-        log.warn("Fallback method called for updating enrollment id: {}", id);
+    // Fallback for updateEnrollment
+    public Enrollment updateEnrollmentFallback(Long id, Enrollment updatedEnrollment, Throwable t) {
+        log.warn("Fallback method called for updating enrollment id: {}", id, t);
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId((long) 0);
+        enrollment.setCourse(null);
+        enrollment.setStatus("Unable to update enrollment at this time, please try again later.");
+        return enrollment;
+    }
+
+    // Fallback for getEnrollmentsByUserId
+    public List<Enrollment> getByUserFallback(String userId, Throwable t) {
+        log.warn("Fallback method called for getEnrollmentsByUserId: {}", userId, t);
+        List<Enrollment> enrollments = new ArrayList<>();
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId((long) 0);
+        enrollment.setCourse(null);
+        enrollment.setStatus("Unable to retrieve user enrollments at this time, please try again later.");
+        enrollments.add(enrollment);
+        return enrollments;
+    }
+
+    // Fallback for getEnrollmentsByCourseId
+    public List<Enrollment> getByCourseFallback(String courseId, Throwable t) {
+        log.warn("Fallback method called for getEnrollmentsByCourseId: {}", courseId, t);
+        List<Enrollment> enrollments = new ArrayList<>();
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId((long) 0);
+        enrollment.setCourse(null);
+        enrollment.setStatus("Unable to retrieve course enrollments at this time, please try again later.");
+        enrollments.add(enrollment);
+        return enrollments;
+    }
+
+    public Enrollment enrollmentFallback(Long id, Exception ex) {
+        log.warn("Fallback method called for accessing enrollment id: {}", id);
         Enrollment enrollment = new Enrollment();
         enrollment.setId((long) 0);
         enrollment.setCourse(null);
@@ -216,5 +260,45 @@ public class EnrollmentService {
         enrollment.setStatus("Unable to retreive enrollments at this time, please try again.");
         enrollments.add(enrollment);
         return enrollments;
+    }
+
+    @Transactional
+    public void updateLocalUserData(String userId, UserDTO userDTO) {
+        User user = userRepository.findByUserId(userId)
+                .orElse(null);
+
+        if (user != null) {
+            // Update user data
+            user.setUsername(userDTO.getUsername());
+            user.setEmail(userDTO.getEmail());
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setUpdatedAt(LocalDateTime.now());
+
+            userRepository.save(user);
+            log.info("Updated local user data for userId: {}", userId);
+        } else {
+            log.warn("User with ID {} not found in local database", userId);
+        }
+    }
+
+    @Transactional
+    public void updateLocalCourseData(String courseId, CourseDTO courseDTO) {
+        Course course = courseRepository.findByCourseId(courseId)
+                .orElse(null);
+
+        if (course != null) {
+            // Update course data
+            course.setTitle(courseDTO.getTitle());
+            course.setDescription(courseDTO.getDescription());
+            course.setInstructor(courseDTO.getInstructor());
+            course.setMaxEnrollments(courseDTO.getMaxEnrollments());
+            course.setUpdatedAt(LocalDateTime.now());
+
+            courseRepository.save(course);
+            log.info("Updated local course data for courseId: {}", courseId);
+        } else {
+            log.warn("Course with ID {} not found in local database", courseId);
+        }
     }
 }
