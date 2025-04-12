@@ -8,8 +8,8 @@ services:
     ports:
       - "5435:5432"
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: enrollmentservice_db
     volumes:
       - ./sql/init_enrollment.sql:/docker-entrypoint-initdb.d/1-init_enrollment.sql
@@ -30,8 +30,8 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: userservice_db
     volumes:
       - ./sql/init_user.sql:/docker-entrypoint-initdb.d/1-init_user.sql
@@ -53,8 +53,8 @@ services:
     ports:
       - "5434:5432"
     environment:
-      POSTGRES_USER: prod
-      POSTGRES_PASSWORD: prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: courseservice_db
     volumes:
       - ./sql/init_course.sql:/docker-entrypoint-initdb.d/1-init_course.sql
@@ -111,8 +111,8 @@ services:
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://userdb:5432/userservice_db
-      SPRING_DATASOURCE_USERNAME: dev
-      SPRING_DATASOURCE_PASSWORD: dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       GITHUB_USERNAME: "Nicholas-Bava"
       GITHUB_PASSWORD: "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"
     depends_on:
@@ -146,7 +146,7 @@ services:
       - "8082:8080"  # Maps host 8082 to container 8080
     environment:
       SPRING_APPLICATION_NAME: course-service
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8089/"
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
@@ -188,8 +188,8 @@ services:
       CONFIGSERVER_URI: "http://configserver:8089"
       CONFIGSERVER_PORT: "8089"
       SPRING_DATASOURCE_URL: jdbc:postgresql://enrollmentdb:5432/enrollmentservice_db
-      SPRING_DATASOURCE_USERNAME: dev
-      SPRING_DATASOURCE_PASSWORD: dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       GITHUB_USERNAME: "Nicholas-Bava"
       GITHUB_PASSWORD: "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"
     ports:
