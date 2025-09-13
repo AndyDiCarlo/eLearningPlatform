@@ -11,6 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CourseChangeEvent {
     private String courseId;
-    private String eventType; // "UPDATE" or "DELETE"
+    private String eventType;
     private LocalDateTime timestamp;
 }
