@@ -38,10 +38,10 @@ public class UserService {
 	@Autowired
 	ServiceConfig config;
 
-	@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
-    @Retry(name = "retryUserService", fallbackMethod = "userFallback")
-    @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userFallback")
-    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
+	@CircuitBreaker(name = "userService", fallbackMethod = "userIdFallback")
+    @Retry(name = "retryUserService", fallbackMethod = "userIdFallback")
+    @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userIdFallback")
+    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userIdFallback", type = Bulkhead.Type.SEMAPHORE)
 	public User getUser(String userId){
 		User user = userRepository.findByUserId(userId);
 		if (null == user) {
@@ -94,10 +94,6 @@ public class UserService {
 		return user.withComment(config.getProperty());
 	}
 
-	@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
-    @Retry(name = "retryUserService", fallbackMethod = "userFallback")
-    @RateLimiter(name = "rateLimiterUserService", fallbackMethod = "userFallback")
-    @Bulkhead(name = "bulkheadUserService", fallbackMethod = "userFallback", type = Bulkhead.Type.SEMAPHORE)
 	public String deleteUser(String userId){
 		String responseMessage = null;
 		User user = new User();
@@ -108,13 +104,23 @@ public class UserService {
 
 	}
 
-	public User userFallback() {
-        User user = new User();
-        user.setUserId("0");
+	public User userIdFallback(String userId, Throwable t) {
+		User user = new User();
+		user.setUserId("0");
 		user.setUsername("null");
 		user.setFirstName("null");
 		user.setLastName("null");
-        user.setComment("Unable to access users at this time, please try again.");
-        return user;
+		user.setComment("Unable to access users at this time, please try again.");
+		return user;
+	}
+
+	public User userFallback(User user, Throwable t) {
+        User userIn = new User();
+        userIn.setUserId("0");
+		userIn.setUsername("null");
+		userIn.setFirstName("null");
+		userIn.setLastName("null");
+        userIn.setComment("Unable to access users at this time, please try again.");
+        return userIn;
     }
 }
